@@ -1,9 +1,8 @@
 # GroupChat
 
-<<<<<<< HEAD
-###A distributed group chat system built in GoLang.
+### A distributed group chat system built in GoLang.
 
-#####To run:
+##### To run:
 ```
 go build mp1.go 
 ./mp1 name port n
