@@ -3,11 +3,24 @@
 ### A distributed group chat system built in GoLang.
 
 ##### To run:
+
+To build the server app
 ```
-go build mp1.go 
-./mp1 name port n
+> go build mp1.go
 ```
 
-The name represents the name of the chat participant.
-The port represents the port number to listen to for new connections.
-n represents the number of people in the group.
+To start the chat server
+```
+
+> ./mp1 [PORT NUMBER]
+```
+
+To build the client app
+```
+> go build mp1client.go
+```
+
+To create a client
+```
+> ./mp1client [NAME] [PORT NUMBER] [NUMBER OF PEOPLE]
+```
