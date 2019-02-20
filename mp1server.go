@@ -64,17 +64,24 @@ func startServer() {
 
       // Read incoming chat messages from clients and push them onto the messages channel to broadcast to the other clients
       go func(conn net.Conn, clientId int) {
-        messages <- fmt.Sprintf("Client %d has joined\n", numClients - 1)
         reader := bufio.NewReader(conn)
+        
+        // Get name of the client
+        clientName, err := reader.ReadString('\n') 
+        if err != nil {
+          fmt.Println(err)
+        }
+        messages <- fmt.Sprintf("%s has joined\n", clientName[:len(clientName)-1])
+        
         for {
           message, err := reader.ReadString('\n')
           if err != nil {
             break
           }
-          messages <- fmt.Sprintf("Client %d: %s", clientId, message)
+          messages <- fmt.Sprintf("%s: %s", clientName[:len(clientName)-1], message)
         }
         oldConnectionChannel <- conn
-        messages <- fmt.Sprintf("Client %d has left\n", clientMap[conn])
+        messages <- fmt.Sprintf("%s has left\n", clientName[:len(clientName)-1])
 
       }(conn, clientMap[conn])
 
