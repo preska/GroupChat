@@ -19,7 +19,7 @@ import (
 func main() {
   name := os.Args[1] + "\n"
   port := os.Args[2]
-  //numPeople := os.Args[3]
+  //num := os.Args[3]
 
   host := "localhost"
   conn, err := net.Dial("tcp", host + ":" + port) // connect to a tcp server at the given port
@@ -37,7 +37,8 @@ func main() {
 
   go read(conn) // get message from user input
 
-  _, err = conn.Write([]byte(name)) // send name of client to the server
+  // send name of client to the server
+  _, err = conn.Write([]byte(name)) 
   if err != nil {
     fmt.Println(err.Error())
   }
