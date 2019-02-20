@@ -4,11 +4,6 @@
   
   To start the chat server
   > ./mp1 [PORT NUMBER]
-
-  For client join the chat
-  > telnet localhost [POST NUMBER]
-  OR
-  > telnet [IP ADDRESS] [PORT NUMBER]
 */
 
 package main
@@ -16,29 +11,16 @@ package main
 import (
   "bufio"
   "fmt"
-  "log"
   "net"
   "os"
-  "os/exec"
 )
 
 func main() {
   if len(os.Args) == 2 {
     startServer()
-  } else if len(os.Args) == 4 {
-    //name := os.Args[1]
-    portNum := os.Args[2]
-    //numPeople := os.Args[3]
-    
-    fmt.Println(portNum)
-    
-    cmd := exec.Command("telnet", "localhost", portNum)
-    cmd.Stdout = os.Stdout
-    cmd.Stderr = os.Stderr
-    err := cmd.Run()
-    if err != nil {
-      log.Fatal(err)
-    }    
+  } else {
+    fmt.Println("Enter a port number.")
+    os.Exit(1)
   }
 }
 
@@ -73,63 +55,47 @@ func startServer() {
 
   // Keep the server running until interrupted 
   for {
-    // 3 cases: 
-    // 1) Accept new connections
-    // 2) Clear old connections
-    // 3) Broadcast the chat messages to each client
+    // 3 cases: (1) Accept new connections   (2) Clear old connections   (3) Broadcast the chat messages to each client
     select {
-
-    // 1) Accept new connections
+    // Accept new connections
     case conn := <- newConnectionChannel:
-
-      log.Printf("Accepted new client, #%d", numClients)
-
-      // Add this connection to the `clientMap` map
-      clientMap[conn] = numClients
+      fmt.Printf("Client %d has joined\n", numClients)
+      clientMap[conn] = numClients // Add this connection to the `clientMap` map
       numClients += 1
-
       // Read incoming chat messages from clients and push them onto the messages channel to broadcast to the other clients
       go func(conn net.Conn, clientId int) {
         reader := bufio.NewReader(conn)
         for {
-          incoming, err := reader.ReadString('\n')
+          message, err := reader.ReadString('\n')
           if err != nil {
             break
           }
-          messages <- fmt.Sprintf("Client %d > %s", clientId, incoming)
+          messages <- fmt.Sprintf("Client %d: %s", clientId, message)
         }
-
-        // When we encouter `err` reading, send this 
-        // connection to `oldConnectionChannel` for removal.
-        //
         oldConnectionChannel <- conn
 
       }(conn, clientMap[conn])
 
     // Accept messages from connected clients
     case message := <- messages:
-
       // Loop over all connected clients
       for conn, _ := range clientMap {
+        //if currClientId != clientMap[conn] {
+          // Send the connected clients a message except to the client that sent the message
+          go func(conn net.Conn, message string) {
+            _, err := conn.Write([]byte(message))
 
-        // Send them a message in a go-routine
-        // so that the network operation doesn't block
-        go func(conn net.Conn, message string) {
-          _, err := conn.Write([]byte(message))
-
-          // If there was an error communicating
-          // with them, the connection is dead.
-          if err != nil {
-            oldConnectionChannel <- conn
-          }
-        }(conn, message)
+            if err != nil { // connection is dead
+              oldConnectionChannel <- conn
+            }
+          }(conn, message)
+        //}
       }
-      log.Printf("New message: %s", message)
-      log.Printf("Broadcast to %d clients", len(clientMap))
+      fmt.Printf("%s", message)
 
-    // Remove dead clients
+    // Remove old clients
     case conn := <-oldConnectionChannel:
-      log.Printf("Client %d disconnected", clientMap[conn])
+      fmt.Printf("Client %d has left\n", clientMap[conn])
       delete(clientMap, conn)
     }
   }
