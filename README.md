@@ -6,13 +6,12 @@
 
 To build the server app
 ```
-> go build mp1.go
+> go build mp1server.go
 ```
 
 To start the chat server
 ```
-
-> ./mp1 [PORT NUMBER]
+> ./mp1server [PORT NUMBER]
 ```
 
 To build the client app

@@ -59,11 +59,12 @@ func startServer() {
     select {
     // Accept new connections
     case conn := <- newConnectionChannel:
-      fmt.Printf("Client %d has joined\n", numClients)
       clientMap[conn] = numClients // Add this connection to the `clientMap` map
-      numClients += 1
+      numClients++
+
       // Read incoming chat messages from clients and push them onto the messages channel to broadcast to the other clients
       go func(conn net.Conn, clientId int) {
+        messages <- fmt.Sprintf("Client %d has joined\n", numClients - 1)
         reader := bufio.NewReader(conn)
         for {
           message, err := reader.ReadString('\n')
@@ -73,6 +74,7 @@ func startServer() {
           messages <- fmt.Sprintf("Client %d: %s", clientId, message)
         }
         oldConnectionChannel <- conn
+        messages <- fmt.Sprintf("Client %d has left\n", clientMap[conn])
 
       }(conn, clientMap[conn])
 
@@ -94,8 +96,7 @@ func startServer() {
       fmt.Printf("%s", message)
 
     // Remove old clients
-    case conn := <-oldConnectionChannel:
-      fmt.Printf("Client %d has left\n", clientMap[conn])
+    case conn := <- oldConnectionChannel:
       delete(clientMap, conn)
     }
   }
