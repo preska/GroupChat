@@ -11,7 +11,6 @@ To build the server app
 
 To start the chat server
 ```
-
 > ./mp1 [PORT NUMBER]
 ```
 
