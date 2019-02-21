@@ -1,6 +1,6 @@
 # GroupChat
 
-### A distributed group chat system built in GoLang.
+### A group chat system built in GoLang.
 
 ##### To run:
 
