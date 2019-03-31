@@ -23,6 +23,3 @@ To create a client
 ```
 > ./mp1client [NAME] [PORT NUMBER] [NUMBER OF PEOPLE]
 ```
-
-
-@preska i hope this makes a notification 
